@@ -6,39 +6,34 @@
     <title>STAR MASTER</title>
     <style>
         body {
-            margin: 0;
+            margin: 0; padding: 0;
             font-family: 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;
             background-image: url('image/background.png');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            color: #fff;
-            overflow: hidden;
-            display: flex; justify-content: center; align-items: center; height: 100vh;
+            background-size: cover; background-position: center; background-attachment: fixed;
+            color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden;
         }
         #game-screen {
-            background: rgba(0, 5, 30, 0.85);
-            backdrop-filter: blur(8px);
-            width: 90%; max-width: 600px;
-            padding: 25px; border: 4px solid #fff; box-shadow: 10px 10px 0px #000;
-            text-align: center; position: relative;
+            background: rgba(0, 5, 30, 0.82); backdrop-filter: blur(10px);
+            width: 85%; max-width: 850px; min-height: 480px; padding: 40px;
+            border: 4px solid #fff; box-shadow: 15px 15px 0px #000;
+            text-align: center; position: relative; box-sizing: border-box;
         }
+        h1 { font-size: 2.8rem; color: #ffeb3b; margin-top: 0; text-shadow: 4px 4px 0px #000; letter-spacing: 2px; }
         .btn {
             background: #2196F3; color: white; border: 3px solid #fff;
-            padding: 12px 15px; margin: 8px; cursor: pointer; font-weight: bold;
-            box-shadow: 4px 4px 0px #000; font-size: 16px; width: 100%; max-width: 240px;
+            padding: 15px 20px; margin: 10px; cursor: pointer; font-weight: bold;
+            box-shadow: 5px 5px 0px #000; font-size: 18px; width: 100%; max-width: 320px; transition: 0.1s;
         }
-        .btn:hover { background: #64B5F6; transform: translate(-2px, -2px); box-shadow: 6px 6px 0px #000; }
+        .btn:hover { background: #64B5F6; transform: translate(-2px, -2px); box-shadow: 7px 7px 0px #000; }
         .btn:active { transform: translate(2px, 2px); box-shadow: 0px 0px 0px #000; }
-        .reset-btn { position: fixed; bottom: 20px; left: 20px; background: #f44336; z-index: 100; width: auto; font-size: 14px; }
-        
-        #status-bar { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 1.1rem; color: #00d4ff; border-bottom: 2px solid #334; padding-bottom: 5px; }
-        .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; justify-items: center; }
+        .reset-btn { position: fixed; bottom: 20px; left: 20px; background: #f44336; width: auto; font-size: 14px; display: none; z-index: 100; }
+        #status-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; font-size: 1.4rem; color: #00d4ff; border-bottom: 2px solid #334; padding-bottom: 12px; }
+        .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
         .hidden { display: none !important; }
-        #ranking-list { text-align: left; background: rgba(255,255,255,0.1); padding: 10px; height: 180px; overflow-y: auto; font-size: 14px; margin: 10px 0; }
-        input { padding: 10px; width: 60%; font-size: 16px; border: none; margin-bottom: 10px; text-align: center; border-radius: 5px; }
-        h1 { font-size: 1.8rem; margin: 0 0 10px 0; color: #ffeb3b; }
-        #question { min-height: 80px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; line-height: 1.4; }
+        #question { min-height: 110px; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; line-height: 1.5; font-weight: bold; padding: 0 10px; }
+        input, select { padding: 12px; font-size: 18px; border: none; margin: 10px 0; border-radius: 5px; text-align: center; background: #fff; color: #000; }
+        #ranking-list { text-align: left; background: rgba(0,0,0,0.4); padding: 15px; height: 160px; overflow-y: auto; font-size: 16px; margin-top: 15px; border: 1px solid #445; }
+        #lives-display { color: #ff4081; font-size: 1.6rem; letter-spacing: 3px; }
     </style>
 </head>
 <body>
@@ -47,42 +42,39 @@
 
 <div id="game-screen">
     <div id="password-panel">
-        <h1>🔐 ACCESS RESTRICTED</h1>
+        <h1>🔐 ACCESS</h1>
         <p>パスワードを入力してください</p>
-        <input type="password" id="input-pass" placeholder="Password">
-        <br>
+        <input type="password" id="input-pass" placeholder="Password"><br>
         <button class="btn" onclick="checkPassword()">ENTER</button>
     </div>
 
     <div id="start-panel" class="hidden">
         <h1>✨ STAR MASTER</h1>
-        <p>中学受験・理科 天体50問</p>
-        <input type="text" id="player-name" placeholder="なまえをいれてね" maxlength="8">
-        <div style="margin: 10px 0;">
-            BGM: 
+        <input type="text" id="player-name" placeholder="なまえをいれてね" maxlength="10"><br>
+        <div style="margin: 15px 0;">
+            BGM設定: 
             <select id="bgm-select">
                 <option value="none">なし</option>
-                <option value="bgm1">キラキラ (Type A)</option>
-                <option value="bgm2">レトロ (Type B)</option>
+                <option value="bgm1">BGM1</option>
+                <option value="bgm2">BGM2</option>
             </select>
         </div>
         <button class="btn" onclick="initGame()">ゲームスタート！</button>
-        <button class="btn" onclick="showRankingOnly()">過去の記録を見る</button>
     </div>
 
     <div id="quiz-panel" class="hidden">
         <div id="status-bar">
             <div>⏱ <span id="timer">0.0</span>s</div>
-            <div id="lives">❤️❤️</div>
-            <div>SCORE: <span id="score">0</span></div>
+            <div id="lives-display">❤️❤️</div>
+            <div>SCORE: <span id="score">0</span> / 50</div>
         </div>
-        <div id="question">問題...</div>
+        <div id="question">Loading...</div>
         <div class="choices" id="choices"></div>
     </div>
 
     <div id="result-panel" class="hidden">
-        <h2 id="finish-msg">GAME OVER</h2>
-        <p>スコア: <span id="final-score">0</span> / タイム: <span id="final-time">0</span>秒</p>
+        <h2 id="finish-msg">RESULT</h2>
+        <p style="font-size: 1.6rem;">スコア: <span id="final-score">0</span>点 / タイム: <span id="final-time">0</span>秒</p>
         <div id="ranking-list"></div>
         <button class="btn" onclick="location.reload()">もういちど遊ぶ</button>
     </div>
@@ -91,74 +83,137 @@
 <audio id="audio-bgm1" src="sound/bgm1.mp3" loop></audio>
 <audio id="audio-bgm2" src="sound/bgm2.mp3" loop></audio>
 <audio id="audio-correct" src="sound/correct.mp3"></audio>
+<audio id="audio-wrong" src="sound/wrong.mp3"></audio>
+<audio id="audio-gameover" src="sound/gameover.mp3"></audio>
 
 <script>
-    // --- 【重要】ここを好きなパスワードに変えてください ---
-    const CORRECT_PASSWORD = "hoshi"; 
-
-    // 問題データ（50問分、前回と同じ内容がここに入ります）
-    const quizData = [
+    const CORRECT_PASSWORD = "hoshi"; // 任意のパスワード
+    
+    // 中学受験 天体50問データ
+    const allQuizData = [
         { q: "夏の大三角：こと座の1等星は？", c: ["ベガ", "デネブ", "アルタイル", "アンタレス"], a: "ベガ" },
-        { q: "冬の王者、ベテルギウスがある星座は？", c: ["オリオン座", "おうし座", "ふたご座", "しし座"], a: "オリオン座" },
-        // ... (以下、前回提供した50問の内容をここに貼り付けてください)
-        { q: "星が東から昇って西へ沈むのは、地球が何をしているから？", c: ["自転", "公転", "移動", "爆発"], a: "自転" }
+        { q: "夏の大三角：わし座の1等星は？", c: ["アルタイル", "ベガ", "デネブ", "スピカ"], a: "アルタイル" },
+        { q: "夏の大三角：はくちょう座の1等星は？", c: ["デネブ", "ベガ", "アルタイル", "シリウス"], a: "デネブ" },
+        { q: "冬の大三角：おおいぬ座の1等星は？", c: ["シリウス", "プロキオン", "ベテルギウス", "リゲル"], a: "シリウス" },
+        { q: "冬の大三角：こいぬ座の1等星は？", c: ["プロキオン", "シリウス", "ベテルギウス", "カノープス"], a: "プロキオン" },
+        { q: "冬の大三角：オリオン座にある赤い星は？", c: ["ベテルギウス", "リゲル", "プロキオン", "シリウス"], a: "ベテルギウス" },
+        { q: "オリオン座にある白い星（足側）の名前は？", c: ["リゲル", "ベテルギウス", "プロキオン", "シリウス"], a: "リゲル" },
+        { q: "春の大三角：うしかい座の1等星は？", c: ["アークトゥルス", "スピカ", "デネボラ", "レグルス"], a: "アークトゥルス" },
+        { q: "春の大三角：おとめ座の1等星は？", c: ["スピカ", "アークトゥルス", "デネボラ", "プロキオン"], a: "スピカ" },
+        { q: "春の大三角：しし座のしっぽにある2等星は？", c: ["デネボラ", "スピカ", "アークトゥルス", "レグルス"], a: "デネボラ" },
+        { q: "しし座の胸に輝く1等星は？", c: ["レグルス", "スピカ", "アークトゥルス", "デネボラ"], a: "レグルス" },
+        { q: "北極星は何座に含まれる星？", c: ["こぐま座", "おおぐま座", "カシオペヤ座", "ケフェウス座"], a: "こぐま座" },
+        { q: "北斗七星は何座の一部？", c: ["おおぐま座", "こぐま座", "カシオペヤ座", "しし座"], a: "おおぐま座" },
+        { q: "カシオペヤ座はどんな形の並び？", c: ["Wの形", "Mの形", "Sの形", "Lの形"], a: "Wの形" },
+        { q: "北極星は1日に何度動いて見える？", c: ["ほとんど動かない", "15度", "30度", "360度"], a: "ほとんど動かない" },
+        { q: "さそり座にある赤い1等星は？", c: ["アンタレス", "ベテルギウス", "火星", "アルデバラン"], a: "アンタレス" },
+        { q: "「秋の四辺形」があるのは何の星座？", c: ["ペガスス座", "アンドロメダ座", "みずがめ座", "うお座"], a: "ペガスス座" },
+        { q: "おうし座にある赤い1等星の名前は？", c: ["アルデバラン", "アンタレス", "シリウス", "スピカ"], a: "アルデバラン" },
+        { q: "太陽を除いて、全天で最も明るい恒星は？", c: ["シリウス", "北極星", "ベガ", "リゲル"], a: "シリウス" },
+        { q: "みなみのうお座の1等星（秋のひとつ星）は？", c: ["フォーマルハウト", "アンタレス", "カノープス", "ベガ"], a: "フォーマルハウト" },
+        { q: "星は1時間に何度動いて見える？", c: ["15度", "1度", "30度", "45度"], a: "15度" },
+        { q: "星は1ヶ月に何度（同じ時刻に）動いて見える？", c: ["30度", "15度", "1度", "90度"], a: "30度" },
+        { q: "表面温度が最も高い星の色は？", c: ["青白", "白", "黄", "赤"], a: "青白" },
+        { q: "表面温度が最も低い星の色は？", c: ["赤", "黄", "白", "青白"], a: "赤" },
+        { q: "太陽の表面温度は約何度？", c: ["6000度", "100万度", "1500度", "1500万度"], a: "6000度" },
+        { q: "地球の自転の向きはどっちからどっち？", c: ["西から東", "東から西", "北から南", "南から北"], a: "西から東" },
+        { q: "観測地の北緯と、その場所から見た北極星の何が等しい？", c: ["高度", "方位", "明るさ", "南中時刻"], a: "高度" },
+        { q: "北半球で、南の空の星はどっちからどっちに動く？", c: ["東から西", "西から東", "北から南", "真上へ"], a: "東から西" },
+        { q: "冬の夜空で見える青白い1等星（オリオン座）は？", c: ["リゲル", "ベテルギウス", "アンタレス", "アルデバラン"], a: "リゲル" },
+        { q: "オリオン座の真ん中に並ぶ三つ星はいくつ？", c: ["3つ", "5つ", "7つ", "2つ"], a: "3つ" },
+        { q: "北斗七星から北極星を探すとき、先端の幅の何倍伸ばす？", c: ["5倍", "3倍", "10倍", "7倍"], a: "5倍" },
+        { q: "二十四節気で、昼が最も長い日は？", c: ["夏至", "冬至", "春分", "秋分"], a: "夏至" },
+        { q: "夏の大三角を構成する星座でないのはどれ？", c: ["さそり座", "こと座", "わし座", "はくちょう座"], a: "さそり座" },
+        { q: "1等星よりも明るい星の等級は？", c: ["0等星", "2等星", "6等星", "マイナスはない"], a: "0等星" },
+        { q: "肉眼で見える最も暗い星は何等星？", c: ["6等星", "1等星", "10等星", "3等星"], a: "6等星" },
+        { q: "等級が1つ上がると、明るさは約何倍になる？", c: ["2.5倍", "10倍", "100倍", "5倍"], a: "2.5倍" },
+        { q: "等級が5つ違うと、明るさは何倍違う？", c: ["100倍", "50倍", "10倍", "5倍"], a: "100倍" },
+        { q: "太陽が真南にくることを何という？", c: ["南中", "北上", "日の出", "日没"], a: "南中" },
+        { q: "1年中地平線の下に沈まない星を何という？", c: ["周極星", "恒星", "惑星", "彗星"], a: "周極星" },
+        { q: "天球上で太陽が1年かけて通る道の名前は？", c: ["黄道", "赤道", "白道", "銀河"], a: "黄道" },
+        { q: "黄道12星座に含まれない星座は？", c: ["オリオン座", "おひつじ座", "しし座", "さそり座"], a: "オリオン座" },
+        { q: "七夕の「織姫（おりひめ）」にあたる星は？", c: ["ベガ", "アルタイル", "デネブ", "スピカ"], a: "ベガ" },
+        { q: "七夕の「彦星（ひこぼし）」にあたる星は？", c: ["アルタイル", "ベガ", "デネブ", "スピカ"], a: "アルタイル" },
+        { q: "北極星の高度が90度で見える場所はどこ？", c: ["北極", "南極", "赤道", "日本"], a: "北極" },
+        { q: "天の川をはさんでベガ（こと座）と向かい合う星は？", c: ["アルタイル", "デネブ", "シリウス", "アンタレス"], a: "アルタイル" },
+        { q: "春に見える、はてな（？）を逆にした形の並びは何座？", c: ["しし座", "かに座", "おとめ座", "うしかい座"], a: "しし座" },
+        { q: "夏の南の空に低く見える、S字の形の星座は？", c: ["さそり座", "いて座", "天秤座", "わし座"], a: "さそり座" },
+        { q: "秋の夜空で大きく四角く並ぶのは何座？", c: ["ペガスス座", "カシオペヤ座", "魚座", "クジラ座"], a: "ペガスス座" },
+        { q: "冬の夜空で最も目立つ、鼓（つづみ）の形は？", c: ["オリオン座", "双子座", "牡牛座", "大犬座"], a: "オリオン座" },
+        { q: "星が動いて見えるのは、地球の「何」が原因？", c: ["自転", "公転", "歳差", "爆発"], a: "自転" }
     ];
 
-    let score = 0; let lives = 2; let startTime; let timerInterval; let currentBgm = null; let playerName = "ななし";
-    let usedQuestions = [];
+    let score = 0; let lives = 2; let startTime; let timerInterval; let currentBgm = null;
+    let quizQueue = [];
 
-    // パスワードチェック
+    // パスワード確認
     function checkPassword() {
-        const input = document.getElementById('input-pass').value;
-        if(input === CORRECT_PASSWORD) {
+        if(document.getElementById('input-pass').value === CORRECT_PASSWORD) {
             document.getElementById('password-panel').classList.add('hidden');
             document.getElementById('start-panel').classList.remove('hidden');
-        } else {
-            alert("パスワードが違います。");
-        }
+        } else { alert("パスワードが違います。"); }
     }
 
+    // ゲーム開始
     function initGame() {
-        const inputName = document.getElementById('player-name').value;
-        if(inputName) playerName = inputName;
         document.getElementById('start-panel').classList.add('hidden');
         document.getElementById('quiz-panel').classList.remove('hidden');
+        document.getElementById('global-reset').style.display = 'block';
+
+        // BGM設定
         const selected = document.getElementById('bgm-select').value;
         if(selected !== 'none') { currentBgm = document.getElementById('audio-' + selected); currentBgm.play(); }
+
+        // 不正解の音だけボリュームを下げる（0.5 = 50%）
+        document.getElementById('audio-wrong').volume = 0.5;
+
         startTime = Date.now();
-        timerInterval = setInterval(() => { document.getElementById('timer').innerText = ((Date.now() - startTime) / 1000).toFixed(1); }, 100);
-        score = 0; lives = 2; usedQuestions = []; updateLives(); nextQuestion();
+        timerInterval = setInterval(() => { 
+            document.getElementById('timer').innerText = ((Date.now() - startTime) / 1000).toFixed(1); 
+        }, 100);
+        
+        score = 0; lives = 2; updateLives();
+        quizQueue = [...allQuizData].sort(() => Math.random() - 0.5); // 完全にランダム化
+        nextQuestion();
+    }
+
+    function updateLives() {
+        document.getElementById('lives-display').innerText = "❤️".repeat(lives) + "🖤".repeat(2-lives);
     }
 
     function nextQuestion() {
-        if(usedQuestions.length >= quizData.length) { endGame("🎉 全問クリア！おめでとう！"); return; }
-        let item;
-        do { item = quizData[Math.floor(Math.random() * quizData.length)]; } while (usedQuestions.includes(item));
-        usedQuestions.push(item);
+        if(quizQueue.length === 0) { endGame("🎉 全50問コンプリート！完璧だ！"); return; }
+        const item = quizQueue.shift();
         document.getElementById('question').innerText = item.q;
         const container = document.getElementById('choices');
         container.innerHTML = '';
+        
+        // 選択肢をシャッフルして表示
         [...item.c].sort(() => Math.random() - 0.5).forEach(choice => {
             const b = document.createElement('button');
             b.className = 'btn';
             b.innerText = choice;
             b.onclick = () => {
                 if(choice === item.a) {
-                    score += 100;
+                    score += 1;
                     document.getElementById('audio-correct').play();
                     document.getElementById('score').innerText = score;
                     nextQuestion();
                 } else {
-                    lives--; updateLives();
-                    if(lives <= 0) endGame("☄️ GAME OVER");
-                    else nextQuestion();
+                    lives--;
+                    updateLives();
+                    if(lives <= 0) {
+                        document.getElementById('audio-gameover').play();
+                        endGame("☄️ GAME OVER（2ミス終了）");
+                    } else {
+                        document.getElementById('audio-wrong').play();
+                        nextQuestion();
+                    }
                 }
             };
             container.appendChild(b);
         });
     }
-
-    function updateLives() { document.getElementById('lives').innerText = "❤️".repeat(lives) + "🖤".repeat(2-lives); }
 
     function endGame(msg) {
         clearInterval(timerInterval);
@@ -169,13 +224,13 @@
         const finalTime = document.getElementById('timer').innerText;
         document.getElementById('final-score').innerText = score;
         document.getElementById('final-time').innerText = finalTime;
-        saveScore(playerName, score, finalTime);
+        saveScore(document.getElementById('player-name').value || "ななし", score, finalTime);
     }
 
     function saveScore(name, scr, time) {
         let ranking = JSON.parse(localStorage.getItem('starRanking') || '[]');
         ranking.push({name: name, score: scr, time: parseFloat(time), date: new Date().toLocaleDateString()});
-        ranking.sort((a, b) => b.score - a.score || a.time - b.time);
+        ranking.sort((a, b) => b.score - a.score || a.time - b.time); // 点数順、同点ならタイム順
         ranking = ranking.slice(0, 10);
         localStorage.setItem('starRanking', JSON.stringify(ranking));
         displayRanking(ranking);
@@ -183,15 +238,8 @@
 
     function displayRanking(ranking) {
         const list = document.getElementById('ranking-list');
-        list.innerHTML = "🏆 記録保持者 (TOP 10)<br>" + 
+        list.innerHTML = "🏆 歴代トップ10<br>" + 
             ranking.map((d, i) => `${i+1}位: ${d.name} ${d.score}点 (${d.time}s)`).join('<br>');
-    }
-
-    function showRankingOnly() {
-        document.getElementById('start-panel').classList.add('hidden');
-        document.getElementById('result-panel').classList.remove('hidden');
-        document.getElementById('finish-msg').innerText = "ランキング";
-        displayRanking(JSON.parse(localStorage.getItem('starRanking') || '[]'));
     }
 </script>
 </body>
