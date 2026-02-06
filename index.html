@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="robots" content="noindex,nofollow,noarchive">
+    <title>STAR MASTER</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;
+            background-image: url('image/background.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: #fff;
+            overflow: hidden;
+            display: flex; justify-content: center; align-items: center; height: 100vh;
+        }
+        #game-screen {
+            background: rgba(0, 5, 30, 0.85);
+            backdrop-filter: blur(8px);
+            width: 90%; max-width: 600px;
+            padding: 25px; border: 4px solid #fff; box-shadow: 10px 10px 0px #000;
+            text-align: center; position: relative;
+        }
+        .btn {
+            background: #2196F3; color: white; border: 3px solid #fff;
+            padding: 12px 15px; margin: 8px; cursor: pointer; font-weight: bold;
+            box-shadow: 4px 4px 0px #000; font-size: 16px; width: 100%; max-width: 240px;
+        }
+        .btn:hover { background: #64B5F6; transform: translate(-2px, -2px); box-shadow: 6px 6px 0px #000; }
+        .btn:active { transform: translate(2px, 2px); box-shadow: 0px 0px 0px #000; }
+        .reset-btn { position: fixed; bottom: 20px; left: 20px; background: #f44336; z-index: 100; width: auto; font-size: 14px; }
+        
+        #status-bar { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 1.1rem; color: #00d4ff; border-bottom: 2px solid #334; padding-bottom: 5px; }
+        .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; justify-items: center; }
+        .hidden { display: none !important; }
+        #ranking-list { text-align: left; background: rgba(255,255,255,0.1); padding: 10px; height: 180px; overflow-y: auto; font-size: 14px; margin: 10px 0; }
+        input { padding: 10px; width: 60%; font-size: 16px; border: none; margin-bottom: 10px; text-align: center; border-radius: 5px; }
+        h1 { font-size: 1.8rem; margin: 0 0 10px 0; color: #ffeb3b; }
+        #question { min-height: 80px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; line-height: 1.4; }
+    </style>
+</head>
+<body>
+
+<button id="global-reset" class="btn reset-btn" onclick="location.reload()">【はじめにもどる】</button>
+
+<div id="game-screen">
+    <div id="password-panel">
+        <h1>🔐 ACCESS RESTRICTED</h1>
+        <p>パスワードを入力してください</p>
+        <input type="password" id="input-pass" placeholder="Password">
+        <br>
+        <button class="btn" onclick="checkPassword()">ENTER</button>
+    </div>
+
+    <div id="start-panel" class="hidden">
+        <h1>✨ STAR MASTER</h1>
+        <p>中学受験・理科 天体50問</p>
+        <input type="text" id="player-name" placeholder="なまえをいれてね" maxlength="8">
+        <div style="margin: 10px 0;">
+            BGM: 
+            <select id="bgm-select">
+                <option value="none">なし</option>
+                <option value="bgm1">キラキラ (Type A)</option>
+                <option value="bgm2">レトロ (Type B)</option>
+            </select>
+        </div>
+        <button class="btn" onclick="initGame()">ゲームスタート！</button>
+        <button class="btn" onclick="showRankingOnly()">過去の記録を見る</button>
+    </div>
+
+    <div id="quiz-panel" class="hidden">
+        <div id="status-bar">
+            <div>⏱ <span id="timer">0.0</span>s</div>
+            <div id="lives">❤️❤️</div>
+            <div>SCORE: <span id="score">0</span></div>
+        </div>
+        <div id="question">問題...</div>
+        <div class="choices" id="choices"></div>
+    </div>
+
+    <div id="result-panel" class="hidden">
+        <h2 id="finish-msg">GAME OVER</h2>
+        <p>スコア: <span id="final-score">0</span> / タイム: <span id="final-time">0</span>秒</p>
+        <div id="ranking-list"></div>
+        <button class="btn" onclick="location.reload()">もういちど遊ぶ</button>
+    </div>
+</div>
+
+<audio id="audio-bgm1" src="sound/bgm1.mp3" loop></audio>
+<audio id="audio-bgm2" src="sound/bgm2.mp3" loop></audio>
+<audio id="audio-correct" src="sound/correct.mp3"></audio>
+
+<script>
+    // --- 【重要】ここを好きなパスワードに変えてください ---
+    const CORRECT_PASSWORD = "hoshi"; 
+
+    // 問題データ（50問分、前回と同じ内容がここに入ります）
+    const quizData = [
+        { q: "夏の大三角：こと座の1等星は？", c: ["ベガ", "デネブ", "アルタイル", "アンタレス"], a: "ベガ" },
+        { q: "冬の王者、ベテルギウスがある星座は？", c: ["オリオン座", "おうし座", "ふたご座", "しし座"], a: "オリオン座" },
+        // ... (以下、前回提供した50問の内容をここに貼り付けてください)
+        { q: "星が東から昇って西へ沈むのは、地球が何をしているから？", c: ["自転", "公転", "移動", "爆発"], a: "自転" }
+    ];
+
+    let score = 0; let lives = 2; let startTime; let timerInterval; let currentBgm = null; let playerName = "ななし";
+    let usedQuestions = [];
+
+    // パスワードチェック
+    function checkPassword() {
+        const input = document.getElementById('input-pass').value;
+        if(input === CORRECT_PASSWORD) {
+            document.getElementById('password-panel').classList.add('hidden');
+            document.getElementById('start-panel').classList.remove('hidden');
+        } else {
+            alert("パスワードが違います。");
+        }
+    }
+
+    function initGame() {
+        const inputName = document.getElementById('player-name').value;
+        if(inputName) playerName = inputName;
+        document.getElementById('start-panel').classList.add('hidden');
+        document.getElementById('quiz-panel').classList.remove('hidden');
+        const selected = document.getElementById('bgm-select').value;
+        if(selected !== 'none') { currentBgm = document.getElementById('audio-' + selected); currentBgm.play(); }
+        startTime = Date.now();
+        timerInterval = setInterval(() => { document.getElementById('timer').innerText = ((Date.now() - startTime) / 1000).toFixed(1); }, 100);
+        score = 0; lives = 2; usedQuestions = []; updateLives(); nextQuestion();
+    }
+
+    function nextQuestion() {
+        if(usedQuestions.length >= quizData.length) { endGame("🎉 全問クリア！おめでとう！"); return; }
+        let item;
+        do { item = quizData[Math.floor(Math.random() * quizData.length)]; } while (usedQuestions.includes(item));
+        usedQuestions.push(item);
+        document.getElementById('question').innerText = item.q;
+        const container = document.getElementById('choices');
+        container.innerHTML = '';
+        [...item.c].sort(() => Math.random() - 0.5).forEach(choice => {
+            const b = document.createElement('button');
+            b.className = 'btn';
+            b.innerText = choice;
+            b.onclick = () => {
+                if(choice === item.a) {
+                    score += 100;
+                    document.getElementById('audio-correct').play();
+                    document.getElementById('score').innerText = score;
+                    nextQuestion();
+                } else {
+                    lives--; updateLives();
+                    if(lives <= 0) endGame("☄️ GAME OVER");
+                    else nextQuestion();
+                }
+            };
+            container.appendChild(b);
+        });
+    }
+
+    function updateLives() { document.getElementById('lives').innerText = "❤️".repeat(lives) + "🖤".repeat(2-lives); }
+
+    function endGame(msg) {
+        clearInterval(timerInterval);
+        if(currentBgm) { currentBgm.pause(); currentBgm.currentTime = 0; }
+        document.getElementById('quiz-panel').classList.add('hidden');
+        document.getElementById('result-panel').classList.remove('hidden');
+        document.getElementById('finish-msg').innerText = msg;
+        const finalTime = document.getElementById('timer').innerText;
+        document.getElementById('final-score').innerText = score;
+        document.getElementById('final-time').innerText = finalTime;
+        saveScore(playerName, score, finalTime);
+    }
+
+    function saveScore(name, scr, time) {
+        let ranking = JSON.parse(localStorage.getItem('starRanking') || '[]');
+        ranking.push({name: name, score: scr, time: parseFloat(time), date: new Date().toLocaleDateString()});
+        ranking.sort((a, b) => b.score - a.score || a.time - b.time);
+        ranking = ranking.slice(0, 10);
+        localStorage.setItem('starRanking', JSON.stringify(ranking));
+        displayRanking(ranking);
+    }
+
+    function displayRanking(ranking) {
+        const list = document.getElementById('ranking-list');
+        list.innerHTML = "🏆 記録保持者 (TOP 10)<br>" + 
+            ranking.map((d, i) => `${i+1}位: ${d.name} ${d.score}点 (${d.time}s)`).join('<br>');
+    }
+
+    function showRankingOnly() {
+        document.getElementById('start-panel').classList.add('hidden');
+        document.getElementById('result-panel').classList.remove('hidden');
+        document.getElementById('finish-msg').innerText = "ランキング";
+        displayRanking(JSON.parse(localStorage.getItem('starRanking') || '[]'));
+    }
+</script>
+</body>
+</html>
