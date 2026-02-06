@@ -10,30 +10,47 @@
             font-family: 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;
             background-image: url('image/background.png');
             background-size: cover; background-position: center; background-attachment: fixed;
-            color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden;
+            color: #fff; display: flex; justify-content: center; align-items: flex-start; /* 上寄せに変更 */
+            height: 100vh; overflow: hidden;
         }
         #game-screen {
-            background: rgba(0, 5, 30, 0.82); backdrop-filter: blur(10px);
-            width: 85%; max-width: 850px; min-height: 480px; padding: 40px;
-            border: 4px solid #fff; box-shadow: 15px 15px 0px #000;
+            background: rgba(0, 5, 30, 0.82); backdrop-filter: blur(8px);
+            width: 85%; max-width: 800px; 
+            margin-top: 5vh; /* 上から少しだけ離す（子供たちを避ける） */
+            padding: 30px;
+            border: 4px solid #fff; box-shadow: 12px 12px 0px #000;
             text-align: center; position: relative; box-sizing: border-box;
         }
-        h1 { font-size: 2.8rem; color: #ffeb3b; margin-top: 0; text-shadow: 4px 4px 0px #000; letter-spacing: 2px; }
+        h1 { font-size: 2.5rem; color: #ffeb3b; margin: 0 0 20px 0; text-shadow: 3px 3px 0px #000; }
+        
+        /* ボタン文字を大きく */
         .btn {
             background: #2196F3; color: white; border: 3px solid #fff;
-            padding: 15px 20px; margin: 10px; cursor: pointer; font-weight: bold;
-            box-shadow: 5px 5px 0px #000; font-size: 18px; width: 100%; max-width: 320px; transition: 0.1s;
+            padding: 15px 10px; margin: 8px; cursor: pointer; font-weight: bold;
+            box-shadow: 5px 5px 0px #000; font-size: 22px; /* 拡大 */
+            width: 100%; max-width: 340px; transition: 0.1s;
         }
         .btn:hover { background: #64B5F6; transform: translate(-2px, -2px); box-shadow: 7px 7px 0px #000; }
         .btn:active { transform: translate(2px, 2px); box-shadow: 0px 0px 0px #000; }
+        
         .reset-btn { position: fixed; bottom: 20px; left: 20px; background: #f44336; width: auto; font-size: 14px; display: none; z-index: 100; }
-        #status-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; font-size: 1.4rem; color: #00d4ff; border-bottom: 2px solid #334; padding-bottom: 12px; }
-        .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        
+        #status-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 1.4rem; color: #00d4ff; border-bottom: 2px solid #334; padding-bottom: 10px; }
+        
+        /* 選択肢を押しやすく */
+        .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; justify-items: center; }
         .hidden { display: none !important; }
-        #question { min-height: 110px; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; line-height: 1.5; font-weight: bold; padding: 0 10px; }
-        input, select { padding: 12px; font-size: 18px; border: none; margin: 10px 0; border-radius: 5px; text-align: center; background: #fff; color: #000; }
-        #ranking-list { text-align: left; background: rgba(0,0,0,0.4); padding: 15px; height: 160px; overflow-y: auto; font-size: 16px; margin-top: 15px; border: 1px solid #445; }
-        #lives-display { color: #ff4081; font-size: 1.6rem; letter-spacing: 3px; }
+        
+        /* 問題文を大きく・枠をスリムに */
+        #question { 
+            min-height: 90px; display: flex; align-items: center; justify-content: center; 
+            font-size: 1.8rem; /* 拡大 */
+            line-height: 1.4; font-weight: bold; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 10px;
+        }
+        
+        input, select { padding: 12px; font-size: 18px; border: none; margin: 10px 0; border-radius: 5px; text-align: center; }
+        #ranking-list { text-align: left; background: rgba(0,0,0,0.4); padding: 15px; height: 140px; overflow-y: auto; font-size: 16px; margin-top: 10px; border: 1px solid #445; }
+        #lives-display { color: #ff4081; font-size: 1.8rem; }
     </style>
 </head>
 <body>
@@ -51,13 +68,8 @@
     <div id="start-panel" class="hidden">
         <h1>✨ STAR MASTER</h1>
         <input type="text" id="player-name" placeholder="なまえをいれてね" maxlength="10"><br>
-        <div style="margin: 15px 0;">
-            BGM設定: 
-            <select id="bgm-select">
-                <option value="none">なし</option>
-                <option value="bgm1">BGM1</option>
-                <option value="bgm2">BGM2</option>
-            </select>
+        <div style="margin: 10px 0;">
+            BGM: <select id="bgm-select"><option value="none">なし</option><option value="bgm1">BGM1</option><option value="bgm2">BGM2</option></select>
         </div>
         <button class="btn" onclick="initGame()">ゲームスタート！</button>
     </div>
@@ -66,7 +78,7 @@
         <div id="status-bar">
             <div>⏱ <span id="timer">0.0</span>s</div>
             <div id="lives-display">❤️❤️</div>
-            <div>SCORE: <span id="score">0</span> / 50</div>
+            <div>SCORE: <span id="score">0</span>/50</div>
         </div>
         <div id="question">Loading...</div>
         <div class="choices" id="choices"></div>
@@ -87,9 +99,7 @@
 <audio id="audio-gameover" src="sound/gameover.mp3"></audio>
 
 <script>
-    const CORRECT_PASSWORD = "hoshi"; // 任意のパスワード
-    
-    // 中学受験 天体50問データ
+    const CORRECT_PASSWORD = "103"; 
     const allQuizData = [
         { q: "夏の大三角：こと座の1等星は？", c: ["ベガ", "デネブ", "アルタイル", "アンタレス"], a: "ベガ" },
         { q: "夏の大三角：わし座の1等星は？", c: ["アルタイル", "ベガ", "デネブ", "スピカ"], a: "アルタイル" },
@@ -124,7 +134,7 @@
         { q: "北斗七星から北極星を探すとき、先端の幅の何倍伸ばす？", c: ["5倍", "3倍", "10倍", "7倍"], a: "5倍" },
         { q: "二十四節気で、昼が最も長い日は？", c: ["夏至", "冬至", "春分", "秋分"], a: "夏至" },
         { q: "夏の大三角を構成する星座でないのはどれ？", c: ["さそり座", "こと座", "わし座", "はくちょう座"], a: "さそり座" },
-        { q: "1等星よりも明るい星の等級は？", c: ["0等星", "2等星", "6等星", "マイナスはない"], a: "0等星" },
+        { q: "1等星よりも明るい星の等級は？", c: ["0等星", "2等星", "6等星", "マイナス"], a: "0等星" },
         { q: "肉眼で見える最も暗い星は何等星？", c: ["6等星", "1等星", "10等星", "3等星"], a: "6等星" },
         { q: "等級が1つ上がると、明るさは約何倍になる？", c: ["2.5倍", "10倍", "100倍", "5倍"], a: "2.5倍" },
         { q: "等級が5つ違うと、明るさは何倍違う？", c: ["100倍", "50倍", "10倍", "5倍"], a: "100倍" },
@@ -146,7 +156,6 @@
     let score = 0; let lives = 2; let startTime; let timerInterval; let currentBgm = null;
     let quizQueue = [];
 
-    // パスワード確認
     function checkPassword() {
         if(document.getElementById('input-pass').value === CORRECT_PASSWORD) {
             document.getElementById('password-panel').classList.add('hidden');
@@ -154,32 +163,21 @@
         } else { alert("パスワードが違います。"); }
     }
 
-    // ゲーム開始
     function initGame() {
         document.getElementById('start-panel').classList.add('hidden');
         document.getElementById('quiz-panel').classList.remove('hidden');
         document.getElementById('global-reset').style.display = 'block';
-
-        // BGM設定
         const selected = document.getElementById('bgm-select').value;
         if(selected !== 'none') { currentBgm = document.getElementById('audio-' + selected); currentBgm.play(); }
-
-        // 不正解の音だけボリュームを下げる（0.5 = 50%）
         document.getElementById('audio-wrong').volume = 0.5;
-
         startTime = Date.now();
-        timerInterval = setInterval(() => { 
-            document.getElementById('timer').innerText = ((Date.now() - startTime) / 1000).toFixed(1); 
-        }, 100);
-        
+        timerInterval = setInterval(() => { document.getElementById('timer').innerText = ((Date.now() - startTime) / 1000).toFixed(1); }, 100);
         score = 0; lives = 2; updateLives();
-        quizQueue = [...allQuizData].sort(() => Math.random() - 0.5); // 完全にランダム化
+        quizQueue = [...allQuizData].sort(() => Math.random() - 0.5);
         nextQuestion();
     }
 
-    function updateLives() {
-        document.getElementById('lives-display').innerText = "❤️".repeat(lives) + "🖤".repeat(2-lives);
-    }
+    function updateLives() { document.getElementById('lives-display').innerText = "❤️".repeat(lives) + "🖤".repeat(2-lives); }
 
     function nextQuestion() {
         if(quizQueue.length === 0) { endGame("🎉 全50問コンプリート！完璧だ！"); return; }
@@ -187,28 +185,18 @@
         document.getElementById('question').innerText = item.q;
         const container = document.getElementById('choices');
         container.innerHTML = '';
-        
-        // 選択肢をシャッフルして表示
         [...item.c].sort(() => Math.random() - 0.5).forEach(choice => {
             const b = document.createElement('button');
-            b.className = 'btn';
-            b.innerText = choice;
+            b.className = 'btn'; b.innerText = choice;
             b.onclick = () => {
                 if(choice === item.a) {
-                    score += 1;
-                    document.getElementById('audio-correct').play();
+                    score += 1; document.getElementById('audio-correct').play();
                     document.getElementById('score').innerText = score;
                     nextQuestion();
                 } else {
-                    lives--;
-                    updateLives();
-                    if(lives <= 0) {
-                        document.getElementById('audio-gameover').play();
-                        endGame("☄️ GAME OVER（2ミス終了）");
-                    } else {
-                        document.getElementById('audio-wrong').play();
-                        nextQuestion();
-                    }
+                    lives--; updateLives();
+                    if(lives <= 0) { document.getElementById('audio-gameover').play(); endGame("☄️ GAME OVER"); }
+                    else { document.getElementById('audio-wrong').play(); nextQuestion(); }
                 }
             };
             container.appendChild(b);
@@ -230,7 +218,7 @@
     function saveScore(name, scr, time) {
         let ranking = JSON.parse(localStorage.getItem('starRanking') || '[]');
         ranking.push({name: name, score: scr, time: parseFloat(time), date: new Date().toLocaleDateString()});
-        ranking.sort((a, b) => b.score - a.score || a.time - b.time); // 点数順、同点ならタイム順
+        ranking.sort((a, b) => b.score - a.score || a.time - b.time);
         ranking = ranking.slice(0, 10);
         localStorage.setItem('starRanking', JSON.stringify(ranking));
         displayRanking(ranking);
