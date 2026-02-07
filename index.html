@@ -16,7 +16,7 @@
         #game-screen {
             background: rgba(0, 5, 30, 0.82); backdrop-filter: blur(8px);
             width: 85%; max-width: 800px; 
-            margin-top: 10vh; /* 子供たちの顔に合わせて調整（10-15vhがおすすめ） */
+            margin-top: 18vh; 
             padding: 30px;
             border: 4px solid #fff; box-shadow: 12px 12px 0px #000;
             text-align: center; position: relative; box-sizing: border-box;
@@ -76,7 +76,6 @@
         <p style="font-size: 1.6rem;">スコア: <span id="final-score">0</span>点 / タイム: <span id="final-time">0</span>秒</p>
         <div id="ranking-list"></div>
         <button class="btn" onclick="location.reload()">もういちど遊ぶ</button>
-        <button class="btn" style="background:#f44336; font-size:14px; width:150px;" onclick="resetRanking()">【先生用】記録リセット</button>
     </div>
 </div>
 
@@ -170,7 +169,8 @@
 
     function nextQuestion() {
         if(quizQueue.length === 0) {
-            setTimeout(() => { endGame("🎉 全50問コンプリート！完璧だ！"); }, 300);
+            // スコアが反映されるまでしっかり待つ
+            setTimeout(() => { endGame("🎉 全50問コンプリート！完璧だ！"); }, 500);
             return;
         }
         const item = quizQueue.shift();
@@ -182,11 +182,16 @@
             b.className = 'btn'; b.innerText = choice;
             b.onclick = () => {
                 if(choice === item.a) {
-                    score += 1; document.getElementById('audio-correct').play();
+                    score++; // スコア加算
+                    document.getElementById('audio-correct').play();
                     document.getElementById('score').innerText = score;
+                    
+                    // 次へ進む
                     if (quizQueue.length === 0) {
-                        setTimeout(() => { endGame("🎉 全50問コンプリート！完璧だ！"); }, 300);
-                    } else { nextQuestion(); }
+                        setTimeout(() => { endGame("🎉 全50問コンプリート！完璧だ！"); }, 500);
+                    } else {
+                        nextQuestion();
+                    }
                 } else {
                     lives--; updateLives();
                     if(lives <= 0) { 
@@ -195,8 +200,10 @@
                     } else { 
                         document.getElementById('audio-wrong').play(); 
                         if (quizQueue.length === 0) {
-                            setTimeout(() => { endGame("🎉 全50問コンプリート！"); }, 300);
-                        } else { nextQuestion(); }
+                            setTimeout(() => { endGame("🎉 全50問コンプリート！"); }, 500);
+                        } else {
+                            nextQuestion();
+                        }
                     }
                 }
             };
@@ -207,12 +214,16 @@
     function endGame(msg) {
         clearInterval(timerInterval);
         if(currentBgm) { currentBgm.pause(); currentBgm.currentTime = 0; }
+        
         document.getElementById('quiz-panel').classList.add('hidden');
         document.getElementById('result-panel').classList.remove('hidden');
+        
         const finalTime = document.getElementById('timer').innerText;
         document.getElementById('final-score').innerText = score;
         document.getElementById('final-time').innerText = finalTime;
-        if (score === 50) {
+        
+        // 【最重要】50点判定
+        if (Number(score) >= 50) {
             document.getElementById('audio-fanfare').play();
             document.getElementById('finish-msg').innerText = "🏆 PERFECT!!! " + msg;
             document.getElementById('finish-msg').style.color = "#ffeb3b";
@@ -236,14 +247,6 @@
         const list = document.getElementById('ranking-list');
         list.innerHTML = "🏆 歴代トップ10<br>" + 
             ranking.map((d, i) => `${i+1}位: ${d.name} ${d.score}点 (${d.time}s)`).join('<br>');
-    }
-
-    function resetRanking() {
-        if(confirm("これまでのランキング記録をすべて消去します。よろしいですか？")) {
-            localStorage.removeItem('starRanking');
-            alert("ランキングをリセットしました。");
-            location.reload();
-        }
     }
 </script>
 </body>
