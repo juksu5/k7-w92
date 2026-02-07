@@ -121,7 +121,7 @@
         { q: "オリオン座の真ん中に並ぶ三つ星はいくつ？", c: ["3つ", "5つ", "7つ", "2つ"], a: "3つ" },
         { q: "北斗七星から北極星を探すとき、先端の幅の何倍伸ばす？", c: ["5倍", "3倍", "10倍", "7倍"], a: "5倍" },
         { q: "二十四節気で、昼が最も長い日は？", c: ["夏至", "冬至", "春分", "秋分"], a: "夏至" },
-        { q: "夏の大三角を構成する星座でないのはどれ？", c: ["さそり座", "こと座", "わし座", "はくちょう座"], a: "さそり座" },
+        { q: "夏の大三角を構成する星座ではないのは？", c: ["さそり座", "こと座", "わし座", "はくちょう座"], a: "さそり座" },
         { q: "1等星よりも明るい星の等級は？", c: ["0等星", "2等星", "6等星", "マイナス"], a: "0等星" },
         { q: "肉眼で見える最も暗い星は何等星？", c: ["6等星", "1等星", "10等星", "3等星"], a: "6等星" },
         { q: "等級が1つ上がると、明るさは約何倍になる？", c: ["2.5倍", "10倍", "100倍", "5倍"], a: "2.5倍" },
@@ -159,7 +159,9 @@
         if(selected !== 'none') { currentBgm = document.getElementById('audio-' + selected); currentBgm.play(); }
         document.getElementById('audio-wrong').volume = 0.5;
         startTime = Date.now();
-        timerInterval = setInterval(() => { document.getElementById('timer').innerText = ((Date.now() - startTime) / 1000).toFixed(1); }, 100);
+        timerInterval = setInterval(() => { 
+            document.getElementById('timer').innerText = ((Date.now() - startTime) / 1000).toFixed(1); 
+        }, 100);
         score = 0; lives = 2; updateLives();
         quizQueue = [...allQuizData].sort(() => Math.random() - 0.5);
         nextQuestion();
@@ -168,43 +170,39 @@
     function updateLives() { document.getElementById('lives-display').innerText = "❤️".repeat(lives) + "🖤".repeat(2-lives); }
 
     function nextQuestion() {
-        if(quizQueue.length === 0) {
-            // スコアが反映されるまでしっかり待つ
-            setTimeout(() => { endGame("🎉 全50問コンプリート！完璧だ！"); }, 500);
-            return;
-        }
         const item = quizQueue.shift();
+        
+        // 問題文を表示
         document.getElementById('question').innerText = item.q;
         const container = document.getElementById('choices');
         container.innerHTML = '';
+        
         [...item.c].sort(() => Math.random() - 0.5).forEach(choice => {
             const b = document.createElement('button');
             b.className = 'btn'; b.innerText = choice;
             b.onclick = () => {
+                // 【超重要】ボタンが押された後の処理
                 if(choice === item.a) {
-                    score++; // スコア加算
+                    score++; // スコアを先に増やす
                     document.getElementById('audio-correct').play();
                     document.getElementById('score').innerText = score;
-                    
-                    // 次へ進む
-                    if (quizQueue.length === 0) {
-                        setTimeout(() => { endGame("🎉 全50問コンプリート！完璧だ！"); }, 500);
-                    } else {
-                        nextQuestion();
-                    }
                 } else {
-                    lives--; updateLives();
+                    lives--;
+                    updateLives();
                     if(lives <= 0) { 
                         document.getElementById('audio-gameover').play(); 
                         endGame("☄️ GAME OVER"); 
-                    } else { 
-                        document.getElementById('audio-wrong').play(); 
-                        if (quizQueue.length === 0) {
-                            setTimeout(() => { endGame("🎉 全50問コンプリート！"); }, 500);
-                        } else {
-                            nextQuestion();
-                        }
+                        return; // ライフ0なら即終了
                     }
+                    document.getElementById('audio-wrong').play();
+                }
+
+                // 【修正】次の問題があるか、ここで初めて判定する
+                if (quizQueue.length > 0) {
+                    nextQuestion();
+                } else {
+                    // 最後の1問だった場合
+                    setTimeout(() => { endGame("🎉 全50問コンプリート！"); }, 500);
                 }
             };
             container.appendChild(b);
@@ -222,8 +220,8 @@
         document.getElementById('final-score').innerText = score;
         document.getElementById('final-time').innerText = finalTime;
         
-        // 【最重要】50点判定
-        if (Number(score) >= 50) {
+        // 判定を 50点以上（Numberで確実に数値化）に固定
+        if (parseInt(score) >= 50) {
             document.getElementById('audio-fanfare').play();
             document.getElementById('finish-msg').innerText = "🏆 PERFECT!!! " + msg;
             document.getElementById('finish-msg').style.color = "#ffeb3b";
