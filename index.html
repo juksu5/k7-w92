@@ -6,12 +6,7 @@
     <meta name="robots" content="noindex,nofollow,noarchive">
     <title>STAR MASTER</title>
     <style>
-        /* タブレットで連打してもズームや青い選択が出ないように設定 */
-        * {
-            touch-action: manipulation;
-            -webkit-user-select: none;
-            user-select: none;
-        }
+        * { touch-action: manipulation; -webkit-user-select: none; user-select: none; }
         body {
             margin: 0; padding: 0;
             font-family: 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;
@@ -71,7 +66,7 @@
         <div id="status-bar">
             <div>⏱ <span id="timer">0.0</span>s</div>
             <div id="lives-display">❤️❤️❤️❤️❤️</div>
-            <div>SCORE: <span id="score">0</span>/52</div>
+            <div>SCORE: <span id="score">0</span> / <span id="total-questions">0</span></div>
         </div>
         <div id="question">Loading...</div>
         <div class="choices" id="choices"></div>
@@ -93,11 +88,11 @@
 <audio id="audio-fanfare" src="sound/fanfare.mp3"></audio>
 
 <script>
-    const CORRECT_PASSWORD = "hoshi"; 
+    const CORRECT_PASSWORD = "103"; 
     const allQuizData = [
         { q: "夏の大三角：こと座の1等星は？", c: ["ベガ", "デネブ", "アルタイル", "アンタレス"], a: "ベガ" },
         { q: "夏の大三角：わし座の1等星は？", c: ["アルタイル", "ベガ", "デネブ", "スピカ"], a: "アルタイル" },
-        { q: "夏の大三角：はくちょう座の1等星は？", c: ["デネブ", "ベガ", "アルタイル", "シリウス"], a: "デネブ" },
+        { q: "夏の大三角：はくちょう座ের1等星は？", c: ["デネブ", "ベガ", "アルタイル", "シリウス"], a: "デネブ" },
         { q: "冬の大三角：おおいぬ座の1等星は？", c: ["シリウス", "プロキオン", "ベテルギウス", "リゲル"], a: "シリウス" },
         { q: "冬の大三角：こいぬ座の1等星は？", c: ["プロキオン", "シリウス", "ベテルギウス", "カノープス"], a: "プロキオン" },
         { q: "冬の大三角：オリオン座にある赤い星は？", c: ["ベテルギウス", "リゲル", "プロキオン", "シリウス"], a: "ベテルギウス" },
@@ -128,7 +123,6 @@
         { q: "北斗七星から北極星を探すとき、先端の幅の何倍伸ばす？", c: ["5倍", "3倍", "10倍", "7倍"], a: "5倍" },
         { q: "二十四節気で、昼が最も長い日は？", c: ["夏至", "冬至", "春分", "秋分"], a: "夏至" },
         { q: "夏の大三角を構成する星座でないのはどれ？", c: ["さそり座", "こと座", "わし座", "はくちょう座"], a: "さそり座" },
-        { q: "1等星よりも明るい星の等級は？", c: ["0等星", "2等星", "6等星", "マイナス"], a: "0等星" },
         { q: "肉眼で見える最も暗い星は何等星？", c: ["6等星", "1等星", "10等星", "3等星"], a: "6等星" },
         { q: "等級が1つ上がると、明るさは約何倍になる？", c: ["2.5倍", "10倍", "100倍", "5倍"], a: "2.5倍" },
         { q: "等級が5つ違うと、明るさは何倍違う？", c: ["100倍", "50倍", "10倍", "5倍"], a: "100倍" },
@@ -145,7 +139,6 @@
         { q: "秋の夜空で大きく四角く並ぶのは何座？", c: ["ペガスス座", "カシオペヤ座", "魚座", "クジラ座"], a: "ペガスス座" },
         { q: "冬の夜空で最も目立つ、鼓（つづみ）の形は？", c: ["オリオン座", "双子座", "牡牛座", "大犬座"], a: "オリオン座" },
         { q: "星が動いて見えるのは、地球の「何」が原因？", c: ["自転", "公転", "歳差", "爆発"], a: "自転" },
-        { q: "星が1日に1度動いて見えるのは、地球の「何」が原因？", c: ["公転", "自転", "歳差", "爆発"], a: "公転" },
         { q: "月の表面に見える、周囲より暗く平らな部分を何と呼ぶ？", c: ["海", "陸", "クレーター", "砂漠"], a: "海" }
     ];
 
@@ -167,6 +160,7 @@
         if(selected !== 'none') { 
             currentBgm = document.getElementById('audio-' + selected); 
             currentBgm.volume = 0.7; 
+            currentBgm.currentTime = 0;
             currentBgm.play(); 
         }
         document.getElementById('audio-wrong').volume = 0.5;
@@ -174,7 +168,11 @@
         timerInterval = setInterval(() => { 
             document.getElementById('timer').innerText = ((Date.now() - startTime) / 1000).toFixed(1); 
         }, 100);
+        
         score = 0; lives = 5; updateLives();
+        document.getElementById('total-questions').innerText = allQuizData.length;
+        document.getElementById('score').innerText = "0";
+        
         quizQueue = [...allQuizData].sort(() => Math.random() - 0.5);
         isClickable = true;
         nextQuestion();
@@ -195,7 +193,6 @@
             b.onclick = () => {
                 if(!isClickable) return;
                 isClickable = false;
-
                 const buttons = container.getElementsByTagName('button');
                 let isLast = (quizQueue.length === 0);
 
@@ -206,7 +203,7 @@
                     document.getElementById('score').innerText = score;
                     setTimeout(() => {
                         if (!isLast) nextQuestion();
-                        else endGame("🎉 全問コンプリート！");
+                        else endGame("🎉 全問コンプリート！", true);
                     }, 800);
                 } else {
                     lives--;
@@ -216,14 +213,13 @@
                         if(btn.innerText === item.a) btn.classList.add('correct-flash');
                     }
                     if(lives <= 0) {
-                        document.getElementById('audio-gameover').play();
-                        setTimeout(() => endGame("☄️ GAME OVER"), 1500);
+                        setTimeout(() => endGame("☄️ GAME OVER", false), 1500);
                         return;
                     }
                     document.getElementById('audio-wrong').play();
                     setTimeout(() => {
                         if (!isLast) nextQuestion();
-                        else endGame("🎉 全問コンプリート！");
+                        else endGame("🎉 全問コンプリート！", true);
                     }, 1500);
                 }
             };
@@ -231,20 +227,24 @@
         });
     }
 
-    function endGame(msg) {
+    function endGame(msg, isClear) {
         clearInterval(timerInterval);
         if(currentBgm) { currentBgm.pause(); currentBgm.currentTime = 0; }
+        
         document.getElementById('quiz-panel').classList.add('hidden');
         document.getElementById('result-panel').classList.remove('hidden');
         const finalTime = document.getElementById('timer').innerText;
         document.getElementById('final-score').innerText = score;
         document.getElementById('final-time').innerText = finalTime;
         
-        if (parseInt(score) >= 52) {
+        if (parseInt(score) >= allQuizData.length) {
             document.getElementById('audio-fanfare').play();
             document.getElementById('finish-msg').innerText = "🏆 PERFECT!!! " + msg;
             document.getElementById('finish-msg').style.color = "#ffeb3b";
         } else {
+            if(!isClear || lives <= 0) {
+                document.getElementById('audio-gameover').play();
+            }
             document.getElementById('finish-msg').innerText = msg;
             document.getElementById('finish-msg').style.color = "#fff";
         }
